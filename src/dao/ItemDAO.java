@@ -1,7 +1,11 @@
 package dao;
 
 import dto.Item;
-import java.sql.*;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,20 +22,21 @@ public class ItemDAO {
 
         String sql = "INSERT INTO item (nome, preco, popular) VALUES (?, ?, ?)";
 
-        try {
-
-            PreparedStatement ps = con.prepareStatement(sql);
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setString(1, item.getNome());
             ps.setDouble(2, item.getPreco());
             ps.setBoolean(3, item.isPopular());
 
-            ps.executeUpdate();
+            int linhas = ps.executeUpdate();
 
-            return "Item inserido com sucesso!";
+            if (linhas > 0) {
+                return "Item inserido com sucesso!";
+            } else {
+                return "Erro ao inserir item.";
+            }
 
         } catch (SQLException e) {
-
             return "Erro de SQL: " + e.getMessage();
         }
     }
@@ -43,10 +48,8 @@ public class ItemDAO {
 
         String sql = "SELECT * FROM item";
 
-        try {
-
-            PreparedStatement ps = con.prepareStatement(sql);
-            ResultSet rs = ps.executeQuery();
+        try (PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
 
@@ -73,21 +76,22 @@ public class ItemDAO {
 
         String sql = "UPDATE item SET nome=?, preco=?, popular=? WHERE id=?";
 
-        try {
-
-            PreparedStatement ps = con.prepareStatement(sql);
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setString(1, item.getNome());
             ps.setDouble(2, item.getPreco());
             ps.setBoolean(3, item.isPopular());
             ps.setInt(4, item.getID());
 
-            ps.executeUpdate();
+            int linhas = ps.executeUpdate();
 
-            return "Item alterado!";
+            if (linhas > 0) {
+                return "Item alterado com sucesso!";
+            } else {
+                return "Item não encontrado.";
+            }
 
         } catch (SQLException e) {
-
             return "Erro de SQL: " + e.getMessage();
         }
     }
@@ -97,19 +101,50 @@ public class ItemDAO {
 
         String sql = "DELETE FROM item WHERE id=?";
 
-        try {
-
-            PreparedStatement ps = con.prepareStatement(sql);
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setInt(1, id);
 
-            ps.executeUpdate();
+            int linhas = ps.executeUpdate();
 
-            return "Item excluído!";
+            if (linhas > 0) {
+                return "Item excluído com sucesso!";
+            } else {
+                return "Item não encontrado.";
+            }
 
         } catch (SQLException e) {
-
             return "Erro de SQL: " + e.getMessage();
         }
+    }
+
+    // READ por ID (útil para futuras telas)
+    public Item buscarPorId(int id) {
+
+        String sql = "SELECT * FROM item WHERE id=?";
+
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setInt(1, id);
+
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+
+                Item item = new Item();
+
+                item.setID(rs.getInt("id"));
+                item.setNome(rs.getString("nome"));
+                item.setPreco(rs.getDouble("preco"));
+                item.setPopular(rs.getBoolean("popular"));
+
+                return item;
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Erro de SQL: " + e.getMessage());
+        }
+
+        return null;
     }
 }
