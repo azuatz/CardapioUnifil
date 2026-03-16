@@ -11,7 +11,7 @@ public class ConnectionFactory {
             Class.forName("com.mysql.cj.jdbc.Driver");
             String url = "jdbc:mysql://localhost:3306/CardapioUnifil";
             final String USER = "root";
-            final String PASS = "pedro2206";
+            final String PASS = "";
             con = DriverManager.getConnection(url, USER, PASS);
             System.out.println("Conexão aberta.");
         } catch (ClassNotFoundException e) {
